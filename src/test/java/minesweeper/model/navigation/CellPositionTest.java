@@ -11,32 +11,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CellPositionTest {
 
-    // Сохраним начальные диапазоны, чтобы восстанавливать их после тестов,
-    // так как они статические и влияют на все тесты.
+    // РЎРѕС…СЂР°РЅРёРј РЅР°С‡Р°Р»СЊРЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹, С‡С‚РѕР±С‹ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°С‚СЊ РёС… РїРѕСЃР»Рµ С‚РµСЃС‚РѕРІ,
+    // С‚Р°Рє РєР°Рє РѕРЅРё СЃС‚Р°С‚РёС‡РµСЃРєРёРµ Рё РІР»РёСЏСЋС‚ РЅР° РІСЃРµ С‚РµСЃС‚С‹.
     private static CellRange originalHorizontalRange;
     private static CellRange originalVerticalRange;
 
     @BeforeEach
     void setUpGlobalRanges() {
-        // Сохраняем текущие глобальные диапазоны перед каждым тестом
+        // РЎРѕС…СЂР°РЅСЏРµРј С‚РµРєСѓС‰РёРµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹ РїРµСЂРµРґ РєР°Р¶РґС‹Рј С‚РµСЃС‚РѕРј
         originalHorizontalRange = CellPosition.horizontalRange();
         originalVerticalRange = CellPosition.verticalRange();
 
-        // Устанавливаем известные диапазоны для большинства тестов
-        CellPosition.setHorizontalRange(0, 9); // Например, поле 10x10
+        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РёР·РІРµСЃС‚РЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹ РґР»СЏ Р±РѕР»СЊС€РёРЅСЃС‚РІР° С‚РµСЃС‚РѕРІ
+        CellPosition.setHorizontalRange(0, 9); // РќР°РїСЂРёРјРµСЂ, РїРѕР»Рµ 10x10
         CellPosition.setVerticalRange(0, 9);
     }
 
     @AfterEach
     void restoreGlobalRanges() {
-        // Восстанавливаем исходные глобальные диапазоны после каждого теста
-        // чтобы тесты не влияли друг на друга через статические поля.
+        // Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РёСЃС…РѕРґРЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹ РїРѕСЃР»Рµ РєР°Р¶РґРѕРіРѕ С‚РµСЃС‚Р°
+        // С‡С‚РѕР±С‹ С‚РµСЃС‚С‹ РЅРµ РІР»РёСЏР»Рё РґСЂСѓРі РЅР° РґСЂСѓРіР° С‡РµСЂРµР· СЃС‚Р°С‚РёС‡РµСЃРєРёРµ РїРѕР»СЏ.
         CellPosition.setHorizontalRange(originalHorizontalRange.min(), originalHorizontalRange.max());
         CellPosition.setVerticalRange(originalVerticalRange.min(), originalVerticalRange.max());
     }
 
     @Test
-    @DisplayName("Конструктор создает CellPosition с правильными row и column")
+    @DisplayName("РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃРѕР·РґР°РµС‚ CellPosition СЃ РїСЂР°РІРёР»СЊРЅС‹РјРё row Рё column")
     void constructor_setsRowAndColumnCorrectly() {
         CellPosition pos = new CellPosition(3, 5);
         assertEquals(3, pos.getRow());
@@ -44,7 +44,7 @@ class CellPositionTest {
     }
 
     @Test
-    @DisplayName("getRow и getColumn возвращают правильные значения")
+    @DisplayName("getRow Рё getColumn РІРѕР·РІСЂР°С‰Р°СЋС‚ РїСЂР°РІРёР»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ")
     void getters_returnCorrectValues() {
         int r = 7, c = 2;
         CellPosition pos = new CellPosition(r, c);
@@ -53,7 +53,7 @@ class CellPositionTest {
     }
 
     @Test
-    @DisplayName("setHorizontalRange устанавливает горизонтальный диапазон")
+    @DisplayName("setHorizontalRange СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ РґРёР°РїР°Р·РѕРЅ")
     void setHorizontalRange_updatesRange() {
         CellPosition.setHorizontalRange(1, 5);
         assertEquals(1, CellPosition.horizontalRange().min());
@@ -61,25 +61,25 @@ class CellPositionTest {
     }
 
     @Test
-    @DisplayName("setHorizontalRange не меняет диапазон при невалидных min/max")
+    @DisplayName("setHorizontalRange РЅРµ РјРµРЅСЏРµС‚ РґРёР°РїР°Р·РѕРЅ РїСЂРё РЅРµРІР°Р»РёРґРЅС‹С… min/max")
     void setHorizontalRange_invalidRange_doesNotUpdate() {
-        CellPosition.setHorizontalRange(0, 9); // Начальный
+        CellPosition.setHorizontalRange(0, 9); // РќР°С‡Р°Р»СЊРЅС‹Р№
         CellRange initialRange = CellPosition.horizontalRange();
 
-        CellPosition.setHorizontalRange(5, 1); // Невалидный (max < min)
-        assertEquals(initialRange.min(), CellPosition.horizontalRange().min(), "Диапазон не должен был измениться");
-        assertEquals(initialRange.max(), CellPosition.horizontalRange().max(), "Диапазон не должен был измениться");
+        CellPosition.setHorizontalRange(5, 1); // РќРµРІР°Р»РёРґРЅС‹Р№ (max < min)
+        assertEquals(initialRange.min(), CellPosition.horizontalRange().min(), "Р”РёР°РїР°Р·РѕРЅ РЅРµ РґРѕР»Р¶РµРЅ Р±С‹Р» РёР·РјРµРЅРёС‚СЊСЃСЏ");
+        assertEquals(initialRange.max(), CellPosition.horizontalRange().max(), "Р”РёР°РїР°Р·РѕРЅ РЅРµ РґРѕР»Р¶РµРЅ Р±С‹Р» РёР·РјРµРЅРёС‚СЊСЃСЏ");
 
-        // CellRange сам обрабатывает min < 0, устанавливая его в 0.
-        // CellRange.isValidRange проверяет min >= 0 && max >= min.
-        CellPosition.setHorizontalRange(-1, 5); // Невалидный по CellRange.isValidRange
-        // Проверяем, что не изменился относительно состояния *после* предыдущей попытки (т.е. 0,9)
+        // CellRange СЃР°Рј РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ min < 0, СѓСЃС‚Р°РЅР°РІР»РёРІР°СЏ РµРіРѕ РІ 0.
+        // CellRange.isValidRange РїСЂРѕРІРµСЂСЏРµС‚ min >= 0 && max >= min.
+        CellPosition.setHorizontalRange(-1, 5); // РќРµРІР°Р»РёРґРЅС‹Р№ РїРѕ CellRange.isValidRange
+        // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РЅРµ РёР·РјРµРЅРёР»СЃСЏ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ *РїРѕСЃР»Рµ* РїСЂРµРґС‹РґСѓС‰РµР№ РїРѕРїС‹С‚РєРё (С‚.Рµ. 0,9)
         assertEquals(initialRange.min(), CellPosition.horizontalRange().min());
         assertEquals(initialRange.max(), CellPosition.horizontalRange().max());
     }
 
     @Test
-    @DisplayName("setVerticalRange устанавливает вертикальный диапазон")
+    @DisplayName("setVerticalRange СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РІРµСЂС‚РёРєР°Р»СЊРЅС‹Р№ РґРёР°РїР°Р·РѕРЅ")
     void setVerticalRange_updatesRange() {
         CellPosition.setVerticalRange(2, 7);
         assertEquals(2, CellPosition.verticalRange().min());
@@ -88,29 +88,29 @@ class CellPositionTest {
 
     @ParameterizedTest
     @CsvSource({
-            "0,0,true",   // Внутри диапазона 0-9, 0-9
-            "9,9,true",   // Граница диапазона
-            "5,5,true",   // Середина
-            "0,10,false", // Column за пределами
-            "10,0,false", // Row за пределами
+            "0,0,true",   // Р’РЅСѓС‚СЂРё РґРёР°РїР°Р·РѕРЅР° 0-9, 0-9
+            "9,9,true",   // Р“СЂР°РЅРёС†Р° РґРёР°РїР°Р·РѕРЅР°
+            "5,5,true",   // РЎРµСЂРµРґРёРЅР°
+            "0,10,false", // Column Р·Р° РїСЂРµРґРµР»Р°РјРё
+            "10,0,false", // Row Р·Р° РїСЂРµРґРµР»Р°РјРё
             "-1,5,false", // Row < 0
             "5,-1,false"  // Column < 0
     })
-    @DisplayName("isValid (статический) проверяет, находится ли позиция в установленных диапазонах")
+    @DisplayName("isValid (СЃС‚Р°С‚РёС‡РµСЃРєРёР№) РїСЂРѕРІРµСЂСЏРµС‚, РЅР°С…РѕРґРёС‚СЃСЏ Р»Рё РїРѕР·РёС†РёСЏ РІ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹С… РґРёР°РїР°Р·РѕРЅР°С…")
     void staticIsValid_checksPositionAgainstRanges(int r, int c, boolean expected) {
         assertEquals(expected, CellPosition.isValid(r, c));
     }
 
     @Test
-    @DisplayName("isValid (метод экземпляра) проверяет валидность текущей позиции")
+    @DisplayName("isValid (РјРµС‚РѕРґ СЌРєР·РµРјРїР»СЏСЂР°) РїСЂРѕРІРµСЂСЏРµС‚ РІР°Р»РёРґРЅРѕСЃС‚СЊ С‚РµРєСѓС‰РµР№ РїРѕР·РёС†РёРё")
     void instanceIsValid_checksOwnPosition() {
         CellPosition validPos = new CellPosition(1, 1);
         assertTrue(validPos.isValid());
 
-        CellPosition.setHorizontalRange(0,0); // Сужаем диапазон
+        CellPosition.setHorizontalRange(0,0); // РЎСѓР¶Р°РµРј РґРёР°РїР°Р·РѕРЅ
         CellPosition.setVerticalRange(0,0);
 
-        CellPosition nowInvalidPos = new CellPosition(1,1); // Эта позиция теперь невалидна
+        CellPosition nowInvalidPos = new CellPosition(1,1); // Р­С‚Р° РїРѕР·РёС†РёСЏ С‚РµРїРµСЂСЊ РЅРµРІР°Р»РёРґРЅР°
         assertFalse(nowInvalidPos.isValid());
 
         CellPosition stillValidPos = new CellPosition(0,0);
@@ -118,41 +118,41 @@ class CellPositionTest {
     }
 
     @Test
-    @DisplayName("equals должен возвращать true для одинаковых позиций и false для разных")
+    @DisplayName("equals РґРѕР»Р¶РµРЅ РІРѕР·РІСЂР°С‰Р°С‚СЊ true РґР»СЏ РѕРґРёРЅР°РєРѕРІС‹С… РїРѕР·РёС†РёР№ Рё false РґР»СЏ СЂР°Р·РЅС‹С…")
     void equals_comparesPositionsCorrectly() {
         CellPosition pos1 = new CellPosition(2, 3);
         CellPosition pos2 = new CellPosition(2, 3);
         CellPosition pos3 = new CellPosition(3, 2);
         CellPosition pos4 = new CellPosition(2, 4);
 
-        assertEquals(pos1, pos2, "Позиции с одинаковыми (r,c) должны быть равны");
-        assertNotEquals(pos1, pos3, "Позиции с разными (r,c) не должны быть равны");
-        assertNotEquals(pos1, pos4, "Позиции с разными (r,c) не должны быть равны");
-        assertNotEquals(pos1, null, "Сравнение с null должно возвращать false");
-        assertNotEquals(pos1, new Object(), "Сравнение с объектом другого типа должно возвращать false");
-        assertEquals(pos1,pos1,"Объект должен быть равен самому себе");
+        assertEquals(pos1, pos2, "РџРѕР·РёС†РёРё СЃ РѕРґРёРЅР°РєРѕРІС‹РјРё (r,c) РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЂР°РІРЅС‹");
+        assertNotEquals(pos1, pos3, "РџРѕР·РёС†РёРё СЃ СЂР°Р·РЅС‹РјРё (r,c) РЅРµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЂР°РІРЅС‹");
+        assertNotEquals(pos1, pos4, "РџРѕР·РёС†РёРё СЃ СЂР°Р·РЅС‹РјРё (r,c) РЅРµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЂР°РІРЅС‹");
+        assertNotEquals(pos1, null, "РЎСЂР°РІРЅРµРЅРёРµ СЃ null РґРѕР»Р¶РЅРѕ РІРѕР·РІСЂР°С‰Р°С‚СЊ false");
+        assertNotEquals(pos1, new Object(), "РЎСЂР°РІРЅРµРЅРёРµ СЃ РѕР±СЉРµРєС‚РѕРј РґСЂСѓРіРѕРіРѕ С‚РёРїР° РґРѕР»Р¶РЅРѕ РІРѕР·РІСЂР°С‰Р°С‚СЊ false");
+        assertEquals(pos1,pos1,"РћР±СЉРµРєС‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЂР°РІРµРЅ СЃР°РјРѕРјСѓ СЃРµР±Рµ");
     }
 
     @Test
-    @DisplayName("hashCode должен быть одинаковым для равных объектов")
+    @DisplayName("hashCode РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРґРёРЅР°РєРѕРІС‹Рј РґР»СЏ СЂР°РІРЅС‹С… РѕР±СЉРµРєС‚РѕРІ")
     void hashCode_isConsistentForEqualObjects() {
         CellPosition pos1 = new CellPosition(5, 8);
         CellPosition pos2 = new CellPosition(5, 8);
-        assertEquals(pos1.hashCode(), pos2.hashCode(), "Хеш-коды равных объектов должны совпадать");
+        assertEquals(pos1.hashCode(), pos2.hashCode(), "РҐРµС€-РєРѕРґС‹ СЂР°РІРЅС‹С… РѕР±СЉРµРєС‚РѕРІ РґРѕР»Р¶РЅС‹ СЃРѕРІРїР°РґР°С‚СЊ");
     }
 
     @Test
-    @DisplayName("hashCode обычно различается для не равных объектов")
+    @DisplayName("hashCode РѕР±С‹С‡РЅРѕ СЂР°Р·Р»РёС‡Р°РµС‚СЃСЏ РґР»СЏ РЅРµ СЂР°РІРЅС‹С… РѕР±СЉРµРєС‚РѕРІ")
     void hashCode_usuallyDiffersForUnequalObjects() {
         CellPosition pos1 = new CellPosition(1, 2);
         CellPosition pos3 = new CellPosition(2, 1);
-        // Это не строгое требование для hashCode, но обычно выполняется
-        assertNotEquals(pos1.hashCode(), pos3.hashCode(), "Хеш-коды разных объектов обычно различаются");
+        // Р­С‚Рѕ РЅРµ СЃС‚СЂРѕРіРѕРµ С‚СЂРµР±РѕРІР°РЅРёРµ РґР»СЏ hashCode, РЅРѕ РѕР±С‹С‡РЅРѕ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ
+        assertNotEquals(pos1.hashCode(), pos3.hashCode(), "РҐРµС€-РєРѕРґС‹ СЂР°Р·РЅС‹С… РѕР±СЉРµРєС‚РѕРІ РѕР±С‹С‡РЅРѕ СЂР°Р·Р»РёС‡Р°СЋС‚СЃСЏ");
     }
 
 
     @Test
-    @DisplayName("toString возвращает корректное строковое представление")
+    @DisplayName("toString РІРѕР·РІСЂР°С‰Р°РµС‚ РєРѕСЂСЂРµРєС‚РЅРѕРµ СЃС‚СЂРѕРєРѕРІРѕРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ")
     void toString_returnsCorrectFormat() {
         CellPosition pos = new CellPosition(4, 6);
         assertEquals("CellPosition(4, 6)", pos.toString());

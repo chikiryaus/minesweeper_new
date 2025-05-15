@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CellRangeTest {
 
     @Test
-    @DisplayName("Конструктор с валидными min и max")
+    @DisplayName("РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ РІР°Р»РёРґРЅС‹РјРё min Рё max")
     void constructor_validMinMax_createsRange() {
         CellRange range = new CellRange(1, 5);
         assertEquals(1, range.min());
@@ -18,46 +18,46 @@ class CellRangeTest {
     }
 
     @Test
-    @DisplayName("Конструктор с min < 0, min должен стать 0")
+    @DisplayName("РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ min < 0, min РґРѕР»Р¶РµРЅ СЃС‚Р°С‚СЊ 0")
     void constructor_minLessThanZero_setsMinToZero() {
         CellRange range = new CellRange(-5, 5);
-        assertEquals(0, range.min(), "Min должен быть скорректирован до 0");
+        assertEquals(0, range.min(), "Min РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅ РґРѕ 0");
         assertEquals(5, range.max());
     }
 
     @Test
-    @DisplayName("Конструктор с max < min, max должен стать равным min")
+    @DisplayName("РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ max < min, max РґРѕР»Р¶РµРЅ СЃС‚Р°С‚СЊ СЂР°РІРЅС‹Рј min")
     void constructor_maxLessThanMin_setsMaxToMin() {
         CellRange range = new CellRange(5, 1);
         assertEquals(5, range.min());
-        assertEquals(5, range.max(), "Max должен быть скорректирован до значения Min");
+        assertEquals(5, range.max(), "Max РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅ РґРѕ Р·РЅР°С‡РµРЅРёСЏ Min");
     }
 
     @Test
-    @DisplayName("Конструктор с min < 0 и max < скорректированного min, max должен стать равным скорректированному min (0)")
+    @DisplayName("РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ min < 0 Рё max < СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅРЅРѕРіРѕ min, max РґРѕР»Р¶РµРЅ СЃС‚Р°С‚СЊ СЂР°РІРЅС‹Рј СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅРЅРѕРјСѓ min (0)")
     void constructor_minNegativeAndMaxLessThanCorrectedMin_setsMaxToCorrectedMin() {
         CellRange range = new CellRange(-5, -10);
-        assertEquals(0, range.min(), "Min должен быть скорректирован до 0");
-        assertEquals(0, range.max(), "Max должен быть скорректирован до скорректированного Min (0)");
+        assertEquals(0, range.min(), "Min РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅ РґРѕ 0");
+        assertEquals(0, range.max(), "Max РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅ РґРѕ СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅРЅРѕРіРѕ Min (0)");
     }
 
     @Test
-    @DisplayName("Конструктор с min = 0 и max < min, max должен стать 0")
+    @DisplayName("РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ min = 0 Рё max < min, max РґРѕР»Р¶РµРЅ СЃС‚Р°С‚СЊ 0")
     void constructor_minZeroAndMaxLessThanMin_setsMaxToZero() {
         CellRange range = new CellRange(0, -2);
         assertEquals(0, range.min());
-        assertEquals(0, range.max(), "Max должен быть скорректирован до 0");
+        assertEquals(0, range.max(), "Max РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅ РґРѕ 0");
     }
 
     @Test
-    @DisplayName("min() возвращает правильное минимальное значение")
+    @DisplayName("min() РІРѕР·РІСЂР°С‰Р°РµС‚ РїСЂР°РІРёР»СЊРЅРѕРµ РјРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ")
     void min_returnsCorrectValue() {
         CellRange range = new CellRange(2, 8);
         assertEquals(2, range.min());
     }
 
     @Test
-    @DisplayName("max() возвращает правильное максимальное значение")
+    @DisplayName("max() РІРѕР·РІСЂР°С‰Р°РµС‚ РїСЂР°РІРёР»СЊРЅРѕРµ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ")
     void max_returnsCorrectValue() {
         CellRange range = new CellRange(2, 8);
         assertEquals(8, range.max());
@@ -70,32 +70,32 @@ class CellRangeTest {
             "5, 5, 1",   // [5..5]
             "3, 7, 5"    // [3..7] -> 3, 4, 5, 6, 7
     })
-    @DisplayName("length() возвращает правильную длину диапазона")
+    @DisplayName("length() РІРѕР·РІСЂР°С‰Р°РµС‚ РїСЂР°РІРёР»СЊРЅСѓСЋ РґР»РёРЅСѓ РґРёР°РїР°Р·РѕРЅР°")
     void length_returnsCorrectLength(int min, int max, int expectedLength) {
         CellRange range = new CellRange(min, max);
         assertEquals(expectedLength, range.length());
     }
 
     @Test
-    @DisplayName("length() для диапазона, скорректированного конструктором")
+    @DisplayName("length() РґР»СЏ РґРёР°РїР°Р·РѕРЅР°, СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅРЅРѕРіРѕ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРѕРј")
     void length_afterConstructorCorrection() {
-        CellRange range1 = new CellRange(-5, -2); // Станет [0..0]
+        CellRange range1 = new CellRange(-5, -2); // РЎС‚Р°РЅРµС‚ [0..0]
         assertEquals(1, range1.length());
 
-        CellRange range2 = new CellRange(5, 2); // Станет [5..5]
+        CellRange range2 = new CellRange(5, 2); // РЎС‚Р°РЅРµС‚ [5..5]
         assertEquals(1, range2.length());
     }
 
     @ParameterizedTest
     @CsvSource({
-            "0, 5, true",    // Валидный
-            "0, 0, true",    // Валидный, min = max
-            "5, 10, true",   // Валидный
-            "-1, 5, false",  // Невалидный, min < 0
-            "5, 1, false",   // Невалидный, max < min
-            "-5, -2, false"  // Невалидный, min < 0 и max < min
+            "0, 5, true",    // Р’Р°Р»РёРґРЅС‹Р№
+            "0, 0, true",    // Р’Р°Р»РёРґРЅС‹Р№, min = max
+            "5, 10, true",   // Р’Р°Р»РёРґРЅС‹Р№
+            "-1, 5, false",  // РќРµРІР°Р»РёРґРЅС‹Р№, min < 0
+            "5, 1, false",   // РќРµРІР°Р»РёРґРЅС‹Р№, max < min
+            "-5, -2, false"  // РќРµРІР°Р»РёРґРЅС‹Р№, min < 0 Рё max < min
     })
-    @DisplayName("isValidRange (статический) проверяет валидность диапазона")
+    @DisplayName("isValidRange (СЃС‚Р°С‚РёС‡РµСЃРєРёР№) РїСЂРѕРІРµСЂСЏРµС‚ РІР°Р»РёРґРЅРѕСЃС‚СЊ РґРёР°РїР°Р·РѕРЅР°")
     void staticIsValidRange_checksRangeCorrectly(int min, int max, boolean expected) {
         assertEquals(expected, CellRange.isValidRange(min, max));
     }
@@ -104,20 +104,20 @@ class CellRangeTest {
     @CsvSource({
             "0, 5, 0, true",   // val = min
             "0, 5, 5, true",   // val = max
-            "0, 5, 3, true",   // val внутри диапазона
+            "0, 5, 3, true",   // val РІРЅСѓС‚СЂРё РґРёР°РїР°Р·РѕРЅР°
             "0, 5, -1, false", // val < min
             "0, 5, 6, false",  // val > max
-            "3, 3, 3, true",   // Диапазон из одного числа, val = min = max
+            "3, 3, 3, true",   // Р”РёР°РїР°Р·РѕРЅ РёР· РѕРґРЅРѕРіРѕ С‡РёСЃР»Р°, val = min = max
             "3, 3, 2, false"
     })
-    @DisplayName("contains() проверяет, содержится ли значение в диапазоне")
+    @DisplayName("contains() РїСЂРѕРІРµСЂСЏРµС‚, СЃРѕРґРµСЂР¶РёС‚СЃСЏ Р»Рё Р·РЅР°С‡РµРЅРёРµ РІ РґРёР°РїР°Р·РѕРЅРµ")
     void contains_checksValueCorrectly(int rMin, int rMax, int val, boolean expected) {
         CellRange range = new CellRange(rMin, rMax);
         assertEquals(expected, range.contains(val));
     }
 
     @Test
-    @DisplayName("toString() возвращает корректное строковое представление")
+    @DisplayName("toString() РІРѕР·РІСЂР°С‰Р°РµС‚ РєРѕСЂСЂРµРєС‚РЅРѕРµ СЃС‚СЂРѕРєРѕРІРѕРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ")
     void toString_returnsCorrectFormat() {
         CellRange range1 = new CellRange(0, 9);
         assertEquals("CellRange[0..9]", range1.toString());
@@ -125,7 +125,7 @@ class CellRangeTest {
         CellRange range2 = new CellRange(5, 5);
         assertEquals("CellRange[5..5]", range2.toString());
 
-        CellRange range3 = new CellRange(-2, 7); // Станет [0..7]
+        CellRange range3 = new CellRange(-2, 7); // РЎС‚Р°РЅРµС‚ [0..7]
         assertEquals("CellRange[0..7]", range3.toString());
     }
 }
