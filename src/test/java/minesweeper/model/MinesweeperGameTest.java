@@ -39,8 +39,11 @@ class MinesweeperGameTest {
     @BeforeEach
     void setUp() {
         listener = new TestGameActionListener();
-        // Для CellPosition, если тесты запускаются в разном порядке
-        CellPosition.setVerticalRange(0, 9); // Установим некий дефолт
+        // Устанавливаем дефолтные диапазоны для CellPosition, чтобы избежать проблем
+        // если тесты запускаются в разном порядке или другие тесты их меняют.
+        // Выберите размеры, которые не конфликтуют с размерами полей в ваших тестах,
+        // или устанавливайте их более конкретно в каждом тесте, если нужно.
+        CellPosition.setVerticalRange(0, 9);
         CellPosition.setHorizontalRange(0, 9);
     }
 
@@ -65,49 +68,54 @@ class MinesweeperGameTest {
         game = new MinesweeperGame(1, 1, 0, 1, null); // 1 ячейка, 0 мин
         game.addGameActionListener(listener);
         game.startGame();
-        listener.clearEvents(); // Очищаем событие startGame
+        listener.clearEvents();
 
         CellPosition pos = new CellPosition(0, 0);
         game.openCell(pos);
 
         assertEquals(MinesweeperGame.GameState.WON, game.getGameState());
         assertTrue(game.getMineField().getCell(pos).isOpen());
-        assertTrue(listener.hasEventOfType(GameEvent.Type.CELL_UPDATED));
-        assertTrue(listener.hasEventOfType(GameEvent.Type.GAME_OVER_WON));
-        assertEquals(2, listener.receivedEvents.size()); // CELL_UPDATED, GAME_OVER_WON
+
+        List<GameEvent> events = listener.receivedEvents;
+        assertEquals(2, events.size());
+        assertEquals(GameEvent.Type.CELL_UPDATED, events.get(0).getType());
+        assertEquals(pos, events.get(0).getPosition());
+        assertEquals(GameEvent.Type.GAME_OVER_WON, events.get(1).getType());
     }
 
     @Test
-    @DisplayName("openCell на мине (поле с 1 миной) приводит к проигрышу")
+    @DisplayName("openCell на мине (поле с 1 миной, 1 жизнь) приводит к проигрышу")
     void openCell_onSingleMine_leadsToLoss() {
         game = new MinesweeperGame(1, 1, 1, 1, null); // 1 ячейка, 1 мина, 1 жизнь
-        // В этом случае, единственная ячейка гарантированно будет миной
         game.addGameActionListener(listener);
-        game.startGame(); // placeMinesOnNewField() поставит мину на (0,0)
+        game.startGame();
         listener.clearEvents();
 
-        CellPosition pos = new CellPosition(0, 0);
+        CellPosition pos = new CellPosition(0, 0); // Эта ячейка будет миной
+        int initialMineCountOnField = game.getMineField().getMineCount(); // Должно быть 1
+
         game.openCell(pos);
 
         assertEquals(MinesweeperGame.GameState.LOST, game.getGameState());
         assertEquals(0, game.getPlayer().getLives());
-        assertEquals(0, game.getMineField().getMineCount(), "Количество мин на поле должно уменьшиться"); // Была 1, стала 0
+        assertEquals(initialMineCountOnField - 1, game.getMineField().getMineCount(), "Количество мин на поле должно уменьшиться");
         assertTrue(game.getMineField().getCell(pos).isOpen());
 
-        assertTrue(listener.hasEventOfType(GameEvent.Type.CELL_UPDATED));
-        assertTrue(listener.hasEventOfType(GameEvent.Type.LIVES_CHANGED));
-        assertTrue(listener.hasEventOfType(GameEvent.Type.GAME_OVER_LOST));
-        assertEquals(3, listener.receivedEvents.size());
+        List<GameEvent> events = listener.receivedEvents;
+        assertEquals(4, events.size(), "Ожидается 4 события: CELL_UPDATED, LIVES_CHANGED, FIELD_UPDATED (от revealAllMines), GAME_OVER_LOST");
+        assertEquals(GameEvent.Type.CELL_UPDATED, events.get(0).getType());
+        assertEquals(pos, events.get(0).getPosition());
+        assertEquals(GameEvent.Type.LIVES_CHANGED, events.get(1).getType());
+        assertEquals(GameEvent.Type.FIELD_UPDATED, events.get(2).getType(), "Ожидается FIELD_UPDATED от revealAllMines");
+        assertEquals(GameEvent.Type.GAME_OVER_LOST, events.get(3).getType());
     }
 
     @Test
     @DisplayName("openCell на мине с несколькими жизнями, игра продолжается")
     void openCell_onMineWithMultipleLives_gameContinues() {
         game = new MinesweeperGame(2, 1, 1, 2, null); // 2 ячейки, 1 мина, 2 жизни
-        // Нам нужно, чтобы мина была в известном месте.
-        // После startGame, мина будет либо на (0,0) либо на (1,0).
         game.addGameActionListener(listener);
-        game.startGame();
+        game.startGame(); // Мина разместится на (0,0) или (1,0)
         listener.clearEvents();
 
         CellPosition minePos;
@@ -125,84 +133,89 @@ class MinesweeperGameTest {
         assertEquals(MinesweeperGame.GameState.PLAYING, game.getGameState());
         assertEquals(1, game.getPlayer().getLives());
         assertEquals(initialMineCountOnField - 1, game.getMineField().getMineCount());
-        assertTrue(listener.hasEventOfType(GameEvent.Type.CELL_UPDATED));
-        assertTrue(listener.hasEventOfType(GameEvent.Type.LIVES_CHANGED));
-        assertEquals(2, listener.receivedEvents.size()); // CELL_UPDATED, LIVES_CHANGED
+
+        List<GameEvent> events = listener.receivedEvents;
+        assertEquals(2, events.size());
+        assertEquals(GameEvent.Type.CELL_UPDATED, events.get(0).getType());
+        assertEquals(minePos, events.get(0).getPosition());
+        assertEquals(GameEvent.Type.LIVES_CHANGED, events.get(1).getType());
     }
 
     @Test
-    @DisplayName("openCell на безопасной ячейке, диверсант действует (если есть)")
-    void openCell_onSafeCell_saboteurActsIfPresent() {
-        // Используем реального RelocatingSaboteur, но нам нужно, чтобы он мог что-то сделать.
-        // Поле 3x3. 1 мина, 1 жизнь.
+    @DisplayName("openCell на безопасной ячейке, диверсант действует и перемещает мину на единственное доступное место")
+    void openCell_onSafeCell_saboteurActsAndRelocatesToOnlySpot() {
         RelocatingSaboteur realSaboteur = new RelocatingSaboteur();
-        game = new MinesweeperGame(3, 3, 1, 1, realSaboteur);
-        game.addGameActionListener(listener);
-        game.startGame(); // Мина разместится где-то
-        listener.clearEvents();
+        // Создаем поле 3x3. Мина на (0,0). Откроем (1,1).
+        // Единственное место для перемещения будет (0,1).
+        // Остальные соседи (1,1) будут либо минами, либо открыты.
+        game = new MinesweeperGame(3, 3, 1, 1, realSaboteur); // 1 мина изначально для placeMinesOnNewField
 
-        // Откроем ячейку, которая точно не мина и создаст границу для диверсанта.
-        // Найдем безопасную ячейку.
-        CellPosition safePosToOpen = null;
-        CellPosition minePos = null;
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
-                if (game.getMineField().getCell(r,c).isMine()) {
-                    minePos = new CellPosition(r,c);
-                } else {
-                    safePosToOpen = new CellPosition(r,c);
+        // --- Начало ручной настройки поля для предсказуемости ---
+        // Это грязный способ, лучше бы MineField имел методы для такой настройки.
+        // После startGame() MineField уже создан и мина размещена случайно.
+        // Нам нужно поле с известной конфигурацией.
+        MineField controlledField = new MineField(3, 3, 1); // 1 мина, но мы ее поставим сами
+        CellPosition initialMinePos = new CellPosition(0,0);
+        CellPosition cellToOpenPos = new CellPosition(1,1);
+        CellPosition expectedRelocationSpot = new CellPosition(0,1);
+
+        controlledField.getCell(initialMinePos).setMine(true);
+        // Остальные ячейки - не мины
+        for(int r=0; r<3; r++) {
+            for(int c=0; c<3; c++) {
+                CellPosition current = new CellPosition(r,c);
+                if (!current.equals(initialMinePos) && controlledField.getCell(current) != null) {
+                    controlledField.getCell(current).setMine(false);
                 }
             }
         }
-        assertNotNull(safePosToOpen, "Должна быть найдена безопасная ячейка");
-        assertNotNull(minePos, "Должна быть найдена мина");
+        // Сделаем все соседи cellToOpenPos (кроме initialMinePos и expectedRelocationSpot) невалидными для перемещения
+        controlledField.getCell(0,2).setOpen(true);
+        controlledField.getCell(1,0).setOpen(true);
+        controlledField.getCell(1,2).setOpen(true);
+        controlledField.getCell(2,0).setOpen(true);
+        controlledField.getCell(2,1).setOpen(true);
+        controlledField.getCell(2,2).setOpen(true);
+        // expectedRelocationSpot (0,1) остается закрытым и не миной.
+        // cellToOpenPos (1,1) остается закрытым и не миной.
+        // initialMinePos (0,0) - мина, закрыта.
 
-        // Перед открытием убедимся, что есть куда перемещать мину
-        // (т.е. есть закрытая ячейка, не мина, на границе с будущей открытой)
-        // Это условие сложно гарантировать без детального анализа поля.
-        // Проще проверить, что performAction был вызван, если saboteur != null.
-        // Для этого теста, однако, нам нужен сценарий, где он ВЕРНЕТ true.
+        controlledField.calculateAllAdjacentMines(); // Важно для getBoundaryCellsForRelocation
 
-        // Для предсказуемости, создадим ситуацию, где диверсант точно сработает.
-        // (0,0) - мина, (1,1) - откроем, (0,1) - место для перемещения.
-        game = new MinesweeperGame(3, 3, 1, 1, realSaboteur);
-        game.getMineField().getCell(0,0).setMine(true); // Мина
-        game.getMineField().getCell(0,1).setMine(false); // Место для перемещения
-        game.getMineField().getCell(1,1).setMine(false); // Откроем
-        game.getMineField().calculateAllAdjacentMines();
-        game.addGameActionListener(listener);
-        game.startGame(); // Перезапишет наши мины! Нужно вызывать startGame до ручной установки.
-        // Либо не вызывать startGame, а вручную установить gameState.
-
-        game = new MinesweeperGame(3, 3, 1, 1, realSaboteur);
-        // Установим gameState вручную, чтобы не было случайного размещения мин
-        // Это грязновато, но для теста...
+        // "Внедряем" наше поле в игру (используя рефлексию, т.к. нет сеттера)
         try {
+            java.lang.reflect.Field mineFieldInternal = MinesweeperGame.class.getDeclaredField("mineField");
+            mineFieldInternal.setAccessible(true);
+            mineFieldInternal.set(game, controlledField);
+
+            // Также установим gameState в PLAYING, так как startGame не вызывался с этим полем
             java.lang.reflect.Field gameStateField = MinesweeperGame.class.getDeclaredField("gameState");
             gameStateField.setAccessible(true);
             gameStateField.set(game, MinesweeperGame.GameState.PLAYING);
 
-            java.lang.reflect.Field mineFieldInternal = MinesweeperGame.class.getDeclaredField("mineField");
-            mineFieldInternal.setAccessible(true);
-            MineField knownField = new MineField(3,3,1);
-            knownField.getCell(0,0).setMine(true);
-            knownField.getCell(0,1).setMine(false); // Место
-            knownField.getCell(1,1).setMine(false); // Откроем
-            knownField.calculateAllAdjacentMines();
-            mineFieldInternal.set(game, knownField);
+            // Обновим player и mineCount в game, если это нужно (зависит от конструктора)
+            java.lang.reflect.Field playerInternal = MinesweeperGame.class.getDeclaredField("player");
+            playerInternal.setAccessible(true);
+            playerInternal.set(game, new Player(1)); // 1 жизнь
 
-        } catch (Exception e) { fail("Failed to set up test with reflection: " + e.getMessage()); }
+        } catch (Exception e) {
+            fail("Ошибка настройки теста через рефлексию: " + e.getMessage());
+        }
+        // --- Конец ручной настройки поля ---
 
         game.addGameActionListener(listener);
         listener.clearEvents();
 
-        game.openCell(new CellPosition(1,1)); // Открываем (1,1)
+        assertFalse(game.getMineField().getCell(expectedRelocationSpot).isMine(), "Ожидаемое место для перемещения изначально не мина");
+
+        game.openCell(cellToOpenPos); // Открываем (1,1)
 
         assertTrue(listener.hasEventOfType(GameEvent.Type.SABOTEUR_ACTION), "Событие SABOTEUR_ACTION должно было произойти");
         assertTrue(listener.hasEventOfType(GameEvent.Type.FIELD_UPDATED), "Событие FIELD_UPDATED после диверсанта");
-        // Проверить, что мина переместилась (например, (0,0) больше не мина, а (0,1) - мина)
-        assertFalse(game.getMineField().getCell(0,0).isMine(), "Мина должна была переместиться с (0,0)");
-        assertTrue(game.getMineField().getCell(0,1).isMine(), "Мина должна была переместиться на (0,1)");
+
+        assertFalse(game.getMineField().getCell(initialMinePos).isMine(), "Мина должна была переместиться с " + initialMinePos);
+        assertTrue(game.getMineField().getCell(expectedRelocationSpot).isMine(), "Мина должна была переместиться на " + expectedRelocationSpot);
+        assertEquals(MinesweeperGame.GameState.PLAYING, game.getGameState(), "Игра должна продолжаться, если не было других мин");
     }
 
 
@@ -222,13 +235,13 @@ class MinesweeperGameTest {
         assertTrue(cell.isFlagged());
         assertTrue(listener.hasEventOfType(GameEvent.Type.CELL_UPDATED));
         assertEquals(pos, listener.getLastEvent().getPosition());
+        assertEquals(1, listener.receivedEvents.size());
+
 
         listener.clearEvents();
-        game.toggleFlag(pos);
+        game.toggleFlag(pos); // Снимаем флаг
         assertFalse(cell.isFlagged());
         assertTrue(listener.hasEventOfType(GameEvent.Type.CELL_UPDATED));
+        assertEquals(1, listener.receivedEvents.size());
     }
-
-    // Можно добавить тесты для openCell на уже открытой/флагованной ячейке,
-    // toggleFlag на открытой ячейке - они должны быть проще.
 }
